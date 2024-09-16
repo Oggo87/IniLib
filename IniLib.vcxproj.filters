@@ -23,5 +23,13 @@
     <ClCompile Include="IniLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Test\Test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Test\config.ini">
+      <Filter>Source Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

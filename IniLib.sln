@@ -9,6 +9,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug DLL|x64 = Debug DLL|x64
 		Debug DLL|x86 = Debug DLL|x86
+		Debug Test|x64 = Debug Test|x64
+		Debug Test|x86 = Debug Test|x86
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
 		Release DLL|x64 = Release DLL|x64
@@ -21,6 +23,10 @@ Global
 		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug DLL|x64.Build.0 = Debug DLL|x64
 		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug DLL|x86.ActiveCfg = Debug DLL|Win32
 		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug DLL|x86.Build.0 = Debug DLL|Win32
+		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug Test|x64.ActiveCfg = Debug Test|x64
+		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug Test|x64.Build.0 = Debug Test|x64
+		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug Test|x86.ActiveCfg = Debug Test|Win32
+		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug Test|x86.Build.0 = Debug Test|Win32
 		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug|x64.ActiveCfg = Debug|x64
 		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug|x64.Build.0 = Debug|x64
 		{A42124AF-81B0-4F0B-BF3C-10C024775CBB}.Debug|x86.ActiveCfg = Debug|Win32

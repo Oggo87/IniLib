@@ -3,20 +3,63 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <stdexcept>
 
 namespace IniLib {
 
-    class IniFile; // Forward declaration of IniFile class
+    // Exception class for INI file errors
+    class IniFileException : public std::runtime_error {
+    public:
+        explicit IniFileException(const std::string& message) : std::runtime_error(message) {}
+    };
+
+    // Forward declaration of classes
+    class IniFile;
+    class IniSection;
+
+    // IniValue wrapper class
+    class IniValue {
+    public:
+        // Constructors
+        IniValue() = default;
+        IniValue(const std::vector<std::string>& values) : values(values) {}
+        IniValue(std::initializer_list<std::string> values) : values(values) {};
+        IniValue(const std::string& value) : values({ value }) {}
+
+        // Getters
+        size_t length() const { return values.size(); }
+        bool isVector() const { return values.size() > 1; }
+
+        std::vector<std::string> getVector() const { return values; }
+        std::string getString() const;
+
+        // Append a value
+        void append(const std::string& value);
+
+        // Clear the value
+        void clear();
+
+        // Subscript operator with boundary check
+        std::string& operator[](size_t index);
+        const std::string& operator[](size_t index) const;
+
+    private:
+        std::vector<std::string> values;
+
+        // Joins a vector of strings into a single string, separated by a delimiter
+        static std::string join(const std::vector<std::string>& vec, const std::string& delimiter);
+    };
+
 
     class IniSection {
     public:
-        using KeyValueMap = std::unordered_map<std::string, std::vector<std::string>>;
+        using KeyValueMap = std::unordered_map<std::string, IniValue>;
 
-        // Retrieves a value for a given key
-        std::vector<std::string> get(const std::string& key, const std::vector<std::string>& defaultValue = {}) const;
-        std::string get(const std::string& key, const std::string& defaultValue = "") const;
+        // Get functions returning IniValue
+        IniValue get(const std::string& key, const IniValue& defaultValue = IniValue()) const;
 
-        // Sets a value for a given key
+        // Set functions accepting IniValue, string, or vector<string>
+        void set(const std::string& key, const IniValue& value);
         void set(const std::string& key, const std::vector<std::string>& values);
         void set(const std::string& key, const std::string& value);
 
@@ -33,8 +76,8 @@ namespace IniLib {
         size_t keyCount() const;
 
         // Overload [] to access keys by name
-        std::vector<std::string>& operator[](const std::string& key);
-        const std::vector<std::string>& operator[](const std::string& key) const;
+        IniValue& operator[](const std::string& key);
+        const IniValue& operator[](const std::string& key) const;
 
     private:
         KeyValueMap keyValues;
@@ -49,12 +92,12 @@ namespace IniLib {
 
         // Saves the current INI configuration to a file
         bool save(const std::string& filename) const;
+        
+        // Get functions returning IniValue
+        IniValue get(const std::string& section, const std::string& key, const IniValue& defaultValue = IniValue()) const;
 
-        // Gets a value for a given section and key
-        std::vector<std::string> get(const std::string& section, const std::string& key, const std::vector<std::string>& defaultValue = {}) const;
-        std::string get(const std::string& section, const std::string& key, const std::string& defaultValue = "") const;
-
-        // Sets a value for a given section and key
+        // Set functions accepting IniValue, string, or vector<string>
+        void set(const std::string& section, const std::string& key, const IniValue& value);
         void set(const std::string& section, const std::string& key, const std::vector<std::string>& values);
         void set(const std::string& section, const std::string& key, const std::string& value);
 
@@ -76,9 +119,12 @@ namespace IniLib {
         size_t sectionCount() const;
         size_t keyCount(const std::string& section) const;
 
-        // Access a section via overloaded operator []
+        // Overload [] to access sections by name
         IniSection& operator[](const std::string& section);
         const IniSection& operator[](const std::string& section) const;
+
+        // Adds a section, returns true if the section is newly created, false if it already exists
+        bool addSection(const std::string& section);
 
     private:
         std::unordered_map<std::string, IniSection> sections;
@@ -96,9 +142,6 @@ namespace IniLib {
 
         // Splits a string by a delimiter and trims each part
         static std::vector<std::string> split(const std::string& str, char delimiter);
-
-        // Joins a vector of strings into a single string, separated by a delimiter
-        static std::string join(const std::vector<std::string>& vec, const std::string& delimiter);
     };
 
 } // namespace IniLib

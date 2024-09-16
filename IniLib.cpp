@@ -6,21 +6,58 @@
 
 namespace IniLib {
 
-    // IniSection class methods
-    std::vector<std::string> IniSection::get(const std::string& key, const std::vector<std::string>& defaultValue) const {
-        auto keyIt = keyValues.find(IniFile::toLower(key));
-        if (keyIt != keyValues.end()) {
-            return keyIt->second;
+    //IniValue class methods
+    std::string IniValue::getString() const {
+        if (values.empty()) {
+            return "";
         }
-        return defaultValue;
+        else if (values.size() == 1) {
+            return values[0];
+        }
+        else {
+            return join(values, ", ");
+        }
     }
 
-    std::string IniSection::get(const std::string& key, const std::string& defaultValue) const {
-        auto keyIt = keyValues.find(IniFile::toLower(key));
-        if (keyIt != keyValues.end() && !keyIt->second.empty()) {
-            return keyIt->second.front();
+    void IniValue::append(const std::string& value) {
+        values.push_back(value);
+    }
+
+    void IniValue::clear() {
+        values.clear();
+    }
+
+    std::string& IniValue::operator[](size_t index) {
+        if (index >= values.size()) {
+            throw IniFileException("Index out of bounds");
         }
-        return defaultValue;
+        return values[index];
+    }
+
+    const std::string& IniValue::operator[](size_t index) const {
+        if (index >= values.size()) {
+            throw IniFileException("Index out of bounds");
+        }
+        return values[index];
+    }
+
+    std::string IniValue::join(const std::vector<std::string>& vec, const std::string& delimiter) {
+        std::ostringstream oss;
+        for (size_t i = 0; i < vec.size(); ++i) {
+            if (i != 0) oss << delimiter;
+            oss << vec[i];
+        }
+        return oss.str();
+    }
+
+    // IniSection class methods
+    IniValue IniSection::get(const std::string& key, const IniValue& defaultValue) const {
+        auto it = keyValues.find(IniFile::toLower(key));
+        return (it != keyValues.end()) ? it->second : defaultValue;
+    }
+
+    void IniSection::set(const std::string& key, const IniValue& value) {
+        keyValues[IniFile::toLower(key)] = value;
     }
 
     void IniSection::set(const std::string& key, const std::vector<std::string>& values) {
@@ -47,12 +84,16 @@ namespace IniLib {
         return keyValues.size();
     }
 
-    std::vector<std::string>& IniSection::operator[](const std::string& key) {
+    IniValue& IniSection::operator[](const std::string& key) {
         return keyValues[IniFile::toLower(key)];
     }
 
-    const std::vector<std::string>& IniSection::operator[](const std::string& key) const {
-        return keyValues.at(IniFile::toLower(key));
+    const IniValue& IniSection::operator[](const std::string& key) const {
+        auto it = keyValues.find(IniFile::toLower(key));
+        if (it == keyValues.end()) {
+            throw IniFileException("Key \"" + key + "\" does not exist in the section.");
+        }
+        return it->second;
     }
 
     // IniFile class methods
@@ -89,27 +130,20 @@ namespace IniLib {
             file << "[" << sectionPair.first << "]\n";
             const IniSection::KeyValueMap& keyValues = sectionPair.second.keyValues;
             for (const auto& kv : keyValues) {
-                file << kv.first << "=" << join(kv.second, ",") << "\n";
+                file << kv.first << "=" << kv.second.getString() << "\n";
             }
             file << "\n";
         }
         return true;
     }
 
-    std::vector<std::string> IniFile::get(const std::string& section, const std::string& key, const std::vector<std::string>& defaultValue) const {
-        auto secIt = sections.find(toLower(section));
-        if (secIt != sections.end()) {
-            return secIt->second.get(key, defaultValue);
-        }
-        return defaultValue;
+    IniValue IniFile::get(const std::string& section, const std::string& key, const IniValue& defaultValue) const {
+        auto it = sections.find(IniFile::toLower(section));
+        return (it != sections.end()) ? it->second.get(key, defaultValue) : defaultValue;
     }
 
-    std::string IniFile::get(const std::string& section, const std::string& key, const std::string& defaultValue) const {
-        auto secIt = sections.find(toLower(section));
-        if (secIt != sections.end()) {
-            return secIt->second.get(key, defaultValue);
-        }
-        return defaultValue;
+    void IniFile::set(const std::string& section, const std::string& key, const IniValue& value) {
+        sections[IniFile::toLower(section)].set(key, value);
     }
 
     void IniFile::set(const std::string& section, const std::string& key, const std::vector<std::string>& values) {
@@ -165,11 +199,19 @@ namespace IniLib {
     }
 
     IniSection& IniFile::operator[](const std::string& section) {
-        return sections[toLower(section)];
+        return sections[IniFile::toLower(section)];
     }
 
     const IniSection& IniFile::operator[](const std::string& section) const {
-        return sections.at(toLower(section));
+        auto it = sections.find(IniFile::toLower(section));
+        if (it == sections.end()) {
+            throw IniFileException("Section \"" + section + "\" does not exist.");
+        }
+        return it->second;
+    }
+
+    bool IniFile::addSection(const std::string& section) {
+        return sections.emplace(toLower(section), IniSection()).second;
     }
 
     // Helper functions
@@ -198,15 +240,6 @@ namespace IniLib {
             result.push_back(trim(item));
         }
         return result;
-    }
-
-    std::string IniFile::join(const std::vector<std::string>& vec, const std::string& delimiter) {
-        std::ostringstream oss;
-        for (size_t i = 0; i < vec.size(); ++i) {
-            if (i != 0) oss << delimiter;
-            oss << vec[i];
-        }
-        return oss.str();
     }
 
 } // namespace IniLib
