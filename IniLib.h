@@ -23,8 +23,9 @@ namespace IniLib {
         // Constructors
         IniValue() = default;
         IniValue(const std::vector<std::string>& values) : values(values) {}
-        IniValue(std::initializer_list<std::string> values) : values(values) {};
+        IniValue(std::initializer_list<std::string> values) : values(values) {}
         IniValue(const std::string& value) : values({ value }) {}
+        IniValue(const char value[]) : values({value}) {}
 
         // Getters
         size_t length() const { return values.size(); }
