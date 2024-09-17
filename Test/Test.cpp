@@ -20,6 +20,12 @@ int main() {
             cout << "Key2 exists" << endl;
         }
 
+        // Set a Section, Key and Value
+        ini.set("SetSection", "SetKey", "SetValue");
+
+        // Set a Key and Value in a given section
+        ini["section2"].set("SetKey", "Set Value");
+
         // Remove a key
         ini.removeKey("section1", "key1");
 

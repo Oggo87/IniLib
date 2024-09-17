@@ -60,14 +60,6 @@ namespace IniLib {
         keyValues[IniFile::toLower(key)] = value;
     }
 
-    void IniSection::set(const std::string& key, const std::vector<std::string>& values) {
-        keyValues[IniFile::toLower(key)] = values;
-    }
-
-    void IniSection::set(const std::string& key, const std::string& value) {
-        keyValues[IniFile::toLower(key)] = { value };
-    }
-
     bool IniSection::removeKey(const std::string& key) {
         return keyValues.erase(IniFile::toLower(key)) > 0;
     }
@@ -144,14 +136,6 @@ namespace IniLib {
 
     void IniFile::set(const std::string& section, const std::string& key, const IniValue& value) {
         sections[IniFile::toLower(section)].set(key, value);
-    }
-
-    void IniFile::set(const std::string& section, const std::string& key, const std::vector<std::string>& values) {
-        sections[toLower(section)].set(key, values);
-    }
-
-    void IniFile::set(const std::string& section, const std::string& key, const std::string& value) {
-        sections[toLower(section)].set(key, value);
     }
 
     bool IniFile::removeSection(const std::string& section) {

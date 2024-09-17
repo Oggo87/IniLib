@@ -59,10 +59,8 @@ namespace IniLib {
         // Get functions returning IniValue
         IniValue get(const std::string& key, const IniValue& defaultValue = IniValue()) const;
 
-        // Set functions accepting IniValue, string, or vector<string>
+        // Set functions accepting IniValue
         void set(const std::string& key, const IniValue& value);
-        void set(const std::string& key, const std::vector<std::string>& values);
-        void set(const std::string& key, const std::string& value);
 
         // Removes a key by name
         bool removeKey(const std::string& key);
@@ -97,10 +95,8 @@ namespace IniLib {
         // Get functions returning IniValue
         IniValue get(const std::string& section, const std::string& key, const IniValue& defaultValue = IniValue()) const;
 
-        // Set functions accepting IniValue, string, or vector<string>
+        // Set functions accepting IniValue
         void set(const std::string& section, const std::string& key, const IniValue& value);
-        void set(const std::string& section, const std::string& key, const std::vector<std::string>& values);
-        void set(const std::string& section, const std::string& key, const std::string& value);
 
         // Removes a section or a key
         bool removeSection(const std::string& section);
