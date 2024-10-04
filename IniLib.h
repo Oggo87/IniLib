@@ -24,10 +24,27 @@ SOFTWARE.
 
 #pragma once
 
+/**
+ * @def INILIB_API
+ * @brief API visibility specifier for INILIB.
+ * This macro is used to control symbol visibility when compiling as
+ * a static or dynamic library.
+ */
+#ifdef INILIB_STATIC
+#define INILIB_API 
+#else
+#ifdef INILIB_EXPORTS
+#define INILIB_API __declspec(dllexport)
+#else
+#define INILIB_API  __declspec(dllimport)
+#endif
+#endif
+
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
+#include "IniValueConvert.h"
 
 namespace IniLib {
 
@@ -127,6 +144,124 @@ namespace IniLib {
          * @throws IniFileException if the index is out of bounds
          */
         const std::string& operator[](size_t index) const;
+
+        /**
+         * @brief Returns a single value of type T from the first entry in the vector
+         * @tparam T The type to convert the string value to.
+         * @return T The value of type T.
+         * @throws IniValueConvertException if conversion fails.
+         */
+        template<typename T>
+        T getAs() const {
+            if (values.empty()) {
+                throw IniValueConvertException("IniValue is empty");
+            }
+            return IniValueConvert<T>::decode(values[0]);
+        }
+
+        /**
+         * @brief Returns a vector of values of type T from the internal vector.
+         * @tparam T The type to convert the string values to.
+         * @return std::vector<T> The vector of values of type T.
+         * @throws IniValueConvertException if conversion fails.
+         */
+        template<typename T>
+        std::vector<T> getVectorAs() const {
+            std::vector<T> result;
+            for (const std::string& str : values) {
+                result.push_back(IniValueConvert<T>::decode(str));
+            }
+            return result;
+        }
+
+        /**
+         * @brief Returns a C-style array of values of type T.
+         * @tparam T The type to convert the string values to.
+         * @return T* A pointer to a dynamically allocated C-style array.
+         * @throws IniValueConvertException if conversion fails.
+         */
+        template<typename T>
+        T* getArrayAs() const {
+            std::vector<T> vec = getVectorAs<T>();
+            T* array = new T[vec.size()];
+            std::copy(vec.begin(), vec.end(), array);
+            return array;
+        }
+
+        /**
+         * @brief Templated assignment operator for a single value of type T.
+         *
+         * This operator uses IniValueConvert<T>::encode to convert the value to a string
+         * and assigns it to the internal vector, clearing any previous contents.
+         *
+         * @tparam T The type of the value to be assigned.
+         * @param value The value to assign.
+         * @return IniValue& A reference to the modified IniValue object.
+         */
+        template<typename T>
+        IniValue& operator=(const T& value) {
+            values.clear();
+            values.push_back(IniValueConvert<T>::encode(value));
+            return *this;
+        }
+
+        /**
+         * @brief Templated assignment operator for an array of values of type T.
+         *
+         * This operator uses IniValueConvert<T>::encode to convert each value in the array
+         * to a string and assigns them to the internal vector, clearing any previous contents.
+         *
+         * @tparam T The type of the values in the array.
+         * @tparam N The size of the array.
+         * @param arr The array of values to assign.
+         * @return IniValue& A reference to the modified IniValue object.
+         */
+        template<typename T, size_t N>
+        IniValue& operator=(const T(&arr)[N]) {
+            values.clear();
+            for (size_t i = 0; i < N; ++i) {
+                values.push_back(IniValueConvert<T>::encode(arr[i]));
+            }
+            return *this;
+        }
+
+        /**
+         * @brief Templated assignment operator for an initializer_list of values of type T.
+         *
+         * This operator uses IniValueConvert<T>::encode to convert each value in the initializer_list
+         * to a string and assigns them to the internal vector, clearing any previous contents.
+         *
+         * @tparam T The type of the values in the initializer_list.
+         * @param list The initializer_list of values to assign.
+         * @return IniValue& A reference to the modified IniValue object.
+         */
+        template<typename T>
+        IniValue& operator=(std::initializer_list<T> list) {
+            values.clear();
+            for (const T& value : list) {
+                values.push_back(IniValueConvert<T>::encode(value));
+            }
+            return *this;
+        }
+
+        /**
+         * @brief Templated assignment operator for a vector of values of type T.
+         *
+         * This operator uses IniValueConvert<T>::encode to convert each value in the vector
+         * to a string and assigns them to the internal vector, clearing any previous contents.
+         *
+         * @tparam T The type of the values in the vector.
+         * @param vec The vector of values to assign.
+         * @return IniValue& A reference to the modified IniValue object.
+         */
+        template<typename T>
+        IniValue& operator=(const std::vector<T>& vec) {
+            values.clear();
+            for (const T& value : vec) {
+                values.push_back(IniValueConvert<T>::encode(value));
+            }
+            return *this;
+        }
 
     private:
         std::vector<std::string> values; ///< The underlying vector of values
