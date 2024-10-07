@@ -44,6 +44,7 @@ SOFTWARE.
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
+#include <type_traits>
 #include "IniValueConvert.h"
 
 namespace IniLib {
@@ -217,10 +218,19 @@ namespace IniLib {
          * @return IniValue& A reference to the modified IniValue object.
          */
         template<typename T, size_t N>
-        IniValue& operator=(const T(&arr)[N]) {
+        IniValue& operator=(T(&arr)[N]) {
             values.clear();
-            for (size_t i = 0; i < N; ++i) {
-                values.push_back(IniValueConvert<T>::encode(arr[i]));
+
+            //check if T is a const char * (string literal)
+            if (std::is_same<T, const char>::value)
+            {
+                values.push_back(IniValueConvert<const char*>::encode((const char*)arr));
+            }
+            else
+            {
+                for (size_t i = 0; i < N; ++i) {
+                    values.push_back(IniValueConvert<T>::encode(arr[i]));
+                }
             }
             return *this;
         }
